@@ -1,4 +1,4 @@
-#include <iostream>
+ï»¿#include <iostream>
 #include <bangtal>
 #include <ctime>
 
@@ -15,7 +15,7 @@ int main() {
 	setGameOption(GameOption::GAME_OPTION_MESSAGE_BOX_BUTTON, false);
 	setGameOption(GameOption::GAME_OPTION_ROOM_TITLE, false);
 
-	openScene = Scene::create("", "Images/½ÃÀÛÈ­¸é.png");
+	openScene = Scene::create("", "Images/ì‹œìž‘í™”ë©´.png");
 	openSound = Sound::create("music/opening.mp3");
 
 	openSound->play();
@@ -30,7 +30,7 @@ int main() {
 			lobby_main();
 		}
 		return true;
-	});
+		});
 
 	startGame(openScene);
 	return 0;

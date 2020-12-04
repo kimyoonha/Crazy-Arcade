@@ -2,6 +2,7 @@
 #include <bangtal>
 #include <ctime>
 #include <Windows.h>
+#include "Board.h"
 
 #define EMPTY 0 // 빈 칸
 #define BOMB 1 //물풍선
@@ -26,40 +27,8 @@
 using namespace bangtal;
 using namespace std;
 
-class Board;
-typedef std::shared_ptr<Board> BoardPtr;
-
-class Board : public Object {
-protected:
-    Board(
-        const string& _img,
-        ScenePtr _scene,
-        int _x, int _y, bool _shown,
-        int _status
-    ) : Object(_img, _scene, _x, _y, _shown), status(_status) {};
-    int status;
-    int size = 0; // 물줄기의 길이
-public:
-    static BoardPtr create(
-        const string& _img,
-        ScenePtr _scene,
-        int _x, int _y, bool _shown,
-        int _status
-    ) {
-        auto object = BoardPtr(new Board(_img, _scene, _x, _y, _shown, _status));
-        Object::add(object);
-
-        return object;
-    };
-
-    const int getStatus() { return status; };
-    void setStatus(int _status) { status = _status; };
-    const int getSize() { return size; };
-    void setSize(int _size) { size = _size; };
-
-};
-
 extern void lobby_main();
+extern int level;
 
 ScenePtr oneScene;
 ObjectPtr character;
@@ -142,6 +111,7 @@ bool check(int x, int y) {
             }
             creater->stop();
             hideTimer();
+            showMessage("FAIL!\n다시 도전하세요.");
             live = false;
             return false;
         }
@@ -178,7 +148,7 @@ void one_main() {
 
     //물폭탄 생성용 타이머 //몇 초마다 물풍선 나타날지
     creater = Timer::create(BOMB_TIME);
-    gameTimer = Timer::create(90.0f);
+    gameTimer = Timer::create(60.0f);
     charTimer = Timer::create(0.1f);
 
     for (int i = 0;i < WIDTH;i++) {
@@ -332,10 +302,27 @@ void one_main() {
 
         int bombX = rand() % WIDTH;
         int bombY = rand() % HEIGHT;
+        bool possible = false;
 
-        while (board[bombX][bombY]->getStatus() != EMPTY) {
+        while (board[bombX][bombY]->getStatus() != EMPTY || !possible) {
+            possible = true;
             bombX = rand() % WIDTH;
             bombY = rand() % HEIGHT;
+            int checker[4][2] = {
+                { 7, 7},
+                {57, 7},
+                { 7,73},
+                {57,73}
+            };
+
+            for (auto c : checker) {
+                int k = (characterY + c[1] - 58) / 51;
+                int w = (characterX + c[0] - 37) / 79;
+
+                if (k == bombX && w == bombY) {
+                    possible = false;
+                }
+            }
         }
 
         int size = (rand() % 9) + 3;
@@ -359,7 +346,8 @@ void one_main() {
 
         auto winSound = Sound::create("music/Win.mp3");
 
-        showMessage("WIN!\n다음 스테이지로 이동!");
+        showMessage("SUCCESS!\n2단계로 이동하세요.");
+        level = level == 1 ? 2 : level;
 
         winSound->play();
         background->stop();
